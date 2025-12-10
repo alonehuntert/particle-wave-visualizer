@@ -40,9 +40,9 @@ class SphereMode {
             positions[i * 3 + 2] = z * norm;
             
             const pulse = Math.sin(this.time * 5 + i * 0.01) * mid * 0.3;
-            colors[i * 3] = this.particleSystem.colorScheme[0] * (0.7 + pulse + treble * 0.3);
-            colors[i * 3 + 1] = this.particleSystem.colorScheme[1] * (0.7 + bass * 0.3);
-            colors[i * 3 + 2] = this.particleSystem.colorScheme[2] * (0.7 + mid * 0.3);
+            colors[i * 3] = this.particleSystem.colorScheme[0][0] * (0.7 + pulse + treble * 0.3);
+            colors[i * 3 + 1] = this.particleSystem.colorScheme[0][1] * (0.7 + bass * 0.3);
+            colors[i * 3 + 2] = this.particleSystem.colorScheme[0][2] * (0.7 + mid * 0.3);
         }
         
         this.particleSystem.geometry.attributes.position.needsUpdate = true;
