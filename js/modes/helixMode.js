@@ -40,9 +40,9 @@ class HelixMode {
             positions[i * 3 + 2] = Math.sin(angle) * radiusMod;
             
             const tNorm = t / this.helixHeight;
-            colors[i * 3] = this.particleSystem.colorScheme[0] * (0.5 + tNorm * 0.5 + treble * 0.3);
-            colors[i * 3 + 1] = this.particleSystem.colorScheme[1] * (0.7 + bass * 0.3);
-            colors[i * 3 + 2] = this.particleSystem.colorScheme[2] * (0.6 + mid * 0.4);
+            colors[i * 3] = this.particleSystem.colorScheme[0][0] * (0.5 + tNorm * 0.5 + treble * 0.3);
+            colors[i * 3 + 1] = this.particleSystem.colorScheme[0][1] * (0.7 + bass * 0.3);
+            colors[i * 3 + 2] = this.particleSystem.colorScheme[0][2] * (0.6 + mid * 0.4);
         }
         
         this.particleSystem.geometry.attributes.position.needsUpdate = true;
