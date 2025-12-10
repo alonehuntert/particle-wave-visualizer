@@ -6,7 +6,7 @@ class VortexMode {
         this.rings = 30;
         this.particlesPerRing = Math.floor(this.particleSystem.particleCount / this.rings);
     }
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         let index = 0;
         for (let ring = 0; ring < this.rings; ring++) {
