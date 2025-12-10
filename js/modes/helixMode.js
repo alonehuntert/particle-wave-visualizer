@@ -7,7 +7,7 @@ class HelixMode {
         this.helixHeight = 80;
     }
 
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         for (let i = 0; i < this.particleSystem.particleCount; i++) {
             const strand = i % 2;
