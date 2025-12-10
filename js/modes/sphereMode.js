@@ -6,7 +6,7 @@ class SphereMode {
         this.radius = 50;
     }
 
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         for (let i = 0; i < this.particleSystem.particleCount; i++) {
             const theta = Math.random() * Math.PI * 2;
