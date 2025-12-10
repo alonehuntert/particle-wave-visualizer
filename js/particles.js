@@ -102,7 +102,9 @@ class ParticleSystem {
             this.colors[i3 + 2] = color[2];
         }
         
-        this.geometry.attributes.color.needsUpdate = true;
+   if (this.geometry.attributes.color) {
+        this.geometry. attributes.color.needsUpdate = true;
+    }
     }
     
     /**
@@ -119,7 +121,9 @@ class ParticleSystem {
      * Update particle positions
      */
     updatePositions() {
+    if (this.geometry.attributes.position) {
         this.geometry.attributes.position.needsUpdate = true;
+    }    
     }
     
     /**
