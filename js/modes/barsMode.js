@@ -1,102 +1,64 @@
-/* ================================
-   Frequency Bars Mode
-   ================================ */
-
+// Frequency Bars Mode
 class BarsMode {
     constructor(particleSystem) {
         this.particleSystem = particleSystem;
-        this.config = CONFIG.modes.bars;
-        this.barHeights = new Array(this.config.barCount).fill(0);
-        this.time = 0;
+        this.barCount = 48;
+        this.particlesPerBar = Math.floor(this.particleSystem.particleCount / this.barCount);
+        this.maxHeight = 60;
+        this.radius = 50;
     }
-    
-    /**
-     * Initialize frequency bars
-     */
-    init() {
-        const particleCount = this.particleSystem.particleCount;
-        const barCount = this.config.barCount;
-        const particlesPerBar = Math.floor(particleCount / barCount);
-        const radius = this.config.radius;
-        
+    initialize() {
+        const positions = this.particleSystem.geometry.attributes.position.array;
         let index = 0;
-        for (let bar = 0; bar < barCount; bar++) {
-            const angle = (bar / barCount) * Math.PI * 2;
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            
-            for (let p = 0; p < particlesPerBar; p++) {
-                if (index >= particleCount) break;
-                
-                const i3 = index * 3;
-                const y = 0;
-                
-                this.particleSystem.positions[i3] = x;
-                this.particleSystem.positions[i3 + 1] = y;
-                this.particleSystem.positions[i3 + 2] = z;
-                
-                this.particleSystem.originalPositions[i3] = bar;
-                this.particleSystem.originalPositions[i3 + 1] = p / particlesPerBar;
-                this.particleSystem.originalPositions[i3 + 2] = angle;
-                
+        for (let bar = 0; bar < this.barCount; bar++) {
+            const angle = (bar / this.barCount) * Math.PI * 2;
+            const x = Math.cos(angle) * this.radius;
+            const z = Math.sin(angle) * this.radius;
+            for (let i = 0; i < this.particlesPerBar; i++) {
+                positions[index * 3] = x;
+                positions[index * 3 + 1] = i * 2;
+                positions[index * 3 + 2] = z;
                 index++;
+                if (index >= this.particleSystem.particleCount) break;
             }
+            if (index >= this.particleSystem.particleCount) break;
         }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors();
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    
-    /**
-     * Update frequency bars
-     */
     update(audioData) {
-        this.time += 0.01;
-        
-        const particleCount = this.particleSystem.particleCount;
-        const barCount = this.config.barCount;
-        const maxHeight = this.config.maxHeight;
-        const radius = this.config.radius;
-        
-        // Update bar heights from frequency data
-        if (audioData.full) {
-            const dataPerBar = Math.floor(audioData.full.length / barCount);
-            
-            for (let bar = 0; bar < barCount; bar++) {
-                const start = bar * dataPerBar;
-                const end = start + dataPerBar;
-                const avg = Utils.averageSlice(audioData.full, start, end);
-                
-                // Smooth transition
-                this.barHeights[bar] = Utils.lerp(
-                    this.barHeights[bar],
-                    (avg / 255) * maxHeight,
-                    0.3
-                );
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const colors = this.particleSystem.geometry.attributes.color.array;
+        const freqData = audioData.full;
+        const barWidth = Math.floor(freqData.length / this.barCount);
+        let index = 0;
+        for (let bar = 0; bar < this.barCount; bar++) {
+            const angle = (bar / this.barCount) * Math.PI * 2;
+            const x = Math.cos(angle) * this.radius;
+            const z = Math.sin(angle) * this.radius;
+            const startFreq = bar * barWidth;
+            const endFreq = startFreq + barWidth;
+            let barValue = 0;
+            for (let f = startFreq; f < endFreq; f++) {
+                barValue += freqData[f];
             }
+            barValue = barValue / barWidth / 255;
+            const barHeight = barValue * this.maxHeight;
+            for (let i = 0; i < this.particlesPerBar; i++) {
+                const y = i * 2;
+                const visible = y < barHeight;
+                positions[index * 3] = visible ? x : 0;
+                positions[index * 3 + 1] = visible ? y : -1000;
+                positions[index * 3 + 2] = visible ? z : 0;
+                const heightNorm = y / this.maxHeight;
+                colors[index * 3] = this.particleSystem.colorScheme[0] * (0.3 + heightNorm * 0.7);
+                colors[index * 3 + 1] = this.particleSystem.colorScheme[1] * (0.5 + barValue * 0.5);
+                colors[index * 3 + 2] = this.particleSystem.colorScheme[2] * (0.8 + heightNorm * 0.2);
+                index++;
+                if (index >= this.particleSystem.particleCount) break;
+            }
+            if (index >= this.particleSystem.particleCount) break;
         }
-        
-        // Update particle positions
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            
-            const bar = this.particleSystem.originalPositions[i3];
-            const heightPos = this.particleSystem.originalPositions[i3 + 1];
-            const angle = this.particleSystem.originalPositions[i3 + 2];
-            
-            const barHeight = this.barHeights[Math.floor(bar)] || 0;
-            const y = heightPos * barHeight;
-            
-            // Add some width variation
-            const widthMod = Math.sin(y * 0.1 + this.time) * 2;
-            const radiusMod = radius + widthMod;
-            
-            this.particleSystem.positions[i3] = Math.cos(angle + this.time * 0.1) * radiusMod;
-            this.particleSystem.positions[i3 + 1] = y;
-            this.particleSystem.positions[i3 + 2] = Math.sin(angle + this.time * 0.1) * radiusMod;
-        }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors(audioData);
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
+        this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
 }
