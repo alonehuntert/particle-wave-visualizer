@@ -7,7 +7,7 @@ class BarsMode {
         this.maxHeight = 60;
         this.radius = 50;
     }
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         let index = 0;
         for (let bar = 0; bar < this.barCount; bar++) {
