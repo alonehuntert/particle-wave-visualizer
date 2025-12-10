@@ -51,9 +51,11 @@ class WaveMode {
                 positions[index * 3 + 1] = waveHeight + ripple;
 
                 const heightNorm = (waveHeight + 20) / 40;
-                colors[index * 3] = this.particleSystem.colorPalette[0][0] * (0.5 + heightNorm * 0.5 + treble * 0.3);
-                colors[index * 3 + 1] = this.particleSystem.colorPalette[0][1] * (0.5 + bass * 0.5);
-                colors[index * 3 + 2] = this.particleSystem.colorPalette[0][2] * (0.5 + mid * 0.5);
+                const position = index / this.particleSystem.particleCount;
+                const color = Utils.getColorFromPalette(this.particleSystem.colorPalette, position);
+                colors[index * 3] = color[0] * (0.5 + heightNorm * 0.5 + treble * 0.3);
+                colors[index * 3 + 1] = color[1] * (0.5 + bass * 0.5);
+                colors[index * 3 + 2] = color[2] * (0.5 + mid * 0.5);
 
                 index++;
                 if (index >= this.particleSystem.particleCount) break;

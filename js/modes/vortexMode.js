@@ -44,9 +44,11 @@ class VortexMode {
                     positions[index * 3 + 2] = -150;
                 }
                 const depth = (positions[index * 3 + 2] + 150) / 200;
-                colors[index * 3] = this.particleSystem.colorScheme[0][0] * (0.3 + depth * 0.7 + treble * 0.3);
-                colors[index * 3 + 1] = this.particleSystem.colorScheme[0][1] * (0.5 + bass * 0.5);
-                colors[index * 3 + 2] = this.particleSystem.colorScheme[0][2] * (0.7 + mid * 0.3);
+                const position = index / this.particleSystem.particleCount;
+                const color = Utils.getColorFromPalette(this.particleSystem.colorPalette, position);
+                colors[index * 3] = color[0] * (0.3 + depth * 0.7 + treble * 0.3);
+                colors[index * 3 + 1] = color[1] * (0.5 + bass * 0.5);
+                colors[index * 3 + 2] = color[2] * (0.7 + mid * 0.3);
                 index++;
                 if (index >= this.particleSystem.particleCount) break;
             }
