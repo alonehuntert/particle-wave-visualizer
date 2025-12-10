@@ -1,80 +1,67 @@
-/* ================================
-   Wave Ocean Mode
-   ================================ */
-
+// Wave Ocean Mode - Particles form a 3D wave grid
 class WaveMode {
     constructor(particleSystem) {
         this.particleSystem = particleSystem;
-        this.config = CONFIG.modes.wave;
         this.time = 0;
+        this.gridSize = 100;
     }
-    
-    /**
-     * Initialize wave grid
-     */
-    init() {
-        const particleCount = this.particleSystem.particleCount;
-        const gridSize = Math.floor(Math.sqrt(particleCount));
-        const spacing = this.config.spacing;
-        const offset = (gridSize * spacing) / 2;
-        
+
+    initialize() {
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const gridSpacing = this.gridSize / Math.sqrt(this.particleSystem.particleCount);
         let index = 0;
-        for (let x = 0; x < gridSize; x++) {
-            for (let z = 0; z < gridSize; z++) {
-                if (index >= particleCount) break;
-                
-                const i = index * 3;
-                this.particleSystem.positions[i] = x * spacing - offset;
-                this.particleSystem.positions[i + 1] = 0;
-                this.particleSystem.positions[i + 2] = z * spacing - offset;
-                
-                this.particleSystem.originalPositions[i] = this.particleSystem.positions[i];
-                this.particleSystem.originalPositions[i + 1] = this.particleSystem.positions[i + 1];
-                this.particleSystem.originalPositions[i + 2] = this.particleSystem.positions[i + 2];
-                
-                index++;
-            }
-        }
+        const rows = Math.sqrt(this.particleSystem.particleCount);
+        const cols = rows;
         
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors();
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const x = (i - rows / 2) * gridSpacing;
+                const z = (j - cols / 2) * gridSpacing;
+                const y = 0;
+                positions[index * 3] = x;
+                positions[index * 3 + 1] = y;
+                positions[index * 3 + 2] = z;
+                index++;
+                if (index >= this.particleSystem.particleCount) break;
+            }
+            if (index >= this.particleSystem.particleCount) break;
+        }
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    
-    /**
-     * Update wave animation
-     */
+
     update(audioData) {
-        this.time += this.config.waveSpeed;
-        
-        const particleCount = this.particleSystem.particleCount;
-        const gridSize = Math.floor(Math.sqrt(particleCount));
-        const amplitude = this.config.waveAmplitude * (1 + audioData.bass / 255);
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const colors = this.particleSystem.geometry.attributes.color.array;
+        this.time += 0.01;
+        const bass = audioData.bass / 255;
+        const mid = audioData.mid / 255;
+        const treble = audioData.treble / 255;
         
         let index = 0;
-        for (let x = 0; x < gridSize; x++) {
-            for (let z = 0; z < gridSize; z++) {
-                if (index >= particleCount) break;
+        const rows = Math.sqrt(this.particleSystem.particleCount);
+        
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < rows; j++) {
+                const x = positions[index * 3];
+                const z = positions[index * 3 + 2];
+                const distance = Math.sqrt(x * x + z * z);
+                const waveHeight = Math.sin(distance * 0.05 - this.time * 2) * 10 * (1 + bass * 2);
+                const ripple = Math.sin(this.time * 3 + i * 0.1) * 2 * mid;
                 
-                const i = index * 3;
-                const px = this.particleSystem.originalPositions[i];
-                const pz = this.particleSystem.originalPositions[i + 2];
+                positions[index * 3 + 1] = waveHeight + ripple;
                 
-                // Calculate wave height
-                const distance = Math.sqrt(px * px + pz * pz);
-                const wave1 = Math.sin(distance * 0.1 + this.time) * amplitude;
-                const wave2 = Math.sin(px * 0.05 + this.time * 0.5) * amplitude * 0.5;
-                const wave3 = Math.sin(pz * 0.05 - this.time * 0.5) * amplitude * 0.5;
-                
-                // Add audio reactivity
-                const audioInfluence = (audioData.mid / 255) * 10;
-                
-                this.particleSystem.positions[i + 1] = wave1 + wave2 + wave3 + audioInfluence;
+                const heightNorm = (waveHeight + 20) / 40;
+                colors[index * 3] = this.particleSystem.colorScheme[0] * (0.5 + heightNorm * 0.5 + treble * 0.3);
+                colors[index * 3 + 1] = this.particleSystem.colorScheme[1] * (0.5 + bass * 0.5);
+                colors[index * 3 + 2] = this.particleSystem.colorScheme[2] * (0.5 + mid * 0.5);
                 
                 index++;
+                if (index >= this.particleSystem.particleCount) break;
             }
+            if (index >= this.particleSystem.particleCount) break;
         }
         
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors(audioData);
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
+        this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
 }
