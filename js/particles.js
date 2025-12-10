@@ -30,7 +30,9 @@ class ParticleSystem {
         this.colors = new Float32Array(this.particleCount * 3);
         this.originalPositions = new Float32Array(this.particleCount * 3);
         this.velocities = new Float32Array(this.particleCount * 3);
-        
+        this.geometry.setAttribute('position', new THREE. BufferAttribute(this.positions, 3));
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
+
         // Initialize with random positions
         this.randomizePositions();
         
