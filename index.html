@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Stunning 3D audio visualizer with real-time particle animations">
+    <title>🌊 Particle Wave Visualizer | alonehuntert</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/controls.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- Canvas Container -->
+    <div id="canvas-container"></div>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+        <p>Loading Visualizer...</p>
+    </div>
+    
+    <!-- Main Controls Panel -->
+    <div id="controls-panel" class="glass-panel">
+        <div class="panel-header">
+            <h1>🌊 Particle Wave Visualizer</h1>
+            <p class="author">by <a href="https://alonehuntert.com" target="_blank">alonehuntert</a></p>
+        </div>
+        
+        <!-- Audio Input Section -->
+        <div class="control-section">
+            <h3>Audio Input</h3>
+            <div class="input-buttons">
+                <button id="mic-btn" class="btn btn-primary" title="Use Microphone">
+                    <span class="icon">🎤</span> Microphone
+                </button>
+                <label for="file-input" class="btn btn-primary" title="Upload Audio File">
+                    <span class="icon">📁</span> Upload File
+                    <input type="file" id="file-input" accept="audio/*" hidden>
+                </label>
+            </div>
+            <div class="demo-tracks">
+                <button class="btn btn-secondary demo-track" data-track="1">Demo Track 1</button>
+                <button class="btn btn-secondary demo-track" data-track="2">Demo Track 2</button>
+            </div>
+        </div>
+        
+        <!-- Audio Controls -->
+        <div class="control-section">
+            <div class="audio-controls">
+                <button id="play-pause-btn" class="btn-icon" title="Play/Pause (Space)">
+                    <span id="play-icon">▶️</span>
+                </button>
+                <div class="seek-bar-container">
+                    <input type="range" id="seek-bar" min="0" max="100" value="0" class="slider">
+                    <div class="time-display">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="volume-control">
+                <span class="icon">🔊</span>
+                <input type="range" id="volume-slider" min="0" max="100" value="80" class="slider">
+                <span id="volume-value">80%</span>
+            </div>
+        </div>
+        
+        <!-- Visualization Settings -->
+        <div class="control-section">
+            <h3>Visualization</h3>
+            <div class="setting-row">
+                <label for="mode-select">Mode:</label>
+                <select id="mode-select" class="select-input">
+                    <option value="wave">🌊 Wave Ocean</option>
+                    <option value="sphere">🔮 Particle Sphere</option>
+                    <option value="helix">🧬 DNA Helix</option>
+                    <option value="galaxy">🌌 Galaxy Spiral</option>
+                    <option value="vortex">🌀 Vortex Tunnel</option>
+                    <option value="bars">📊 Frequency Bars</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label for="color-select">Color:</label>
+                <select id="color-select" class="select-input">
+                    <option value="neon">💜 Neon</option>
+                    <option value="rainbow">🌈 Rainbow</option>
+                    <option value="fire">🔥 Fire</option>
+                    <option value="ocean">🌊 Ocean</option>
+                    <option value="galaxy">🌌 Galaxy</option>
+                    <option value="monochrome">⚪ Monochrome</option>
+                    <option value="custom">🎨 Custom</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label for="particle-count">Particles:</label>
+                <input type="range" id="particle-count" min="1000" max="100000" value="50000" step="1000" class="slider">
+                <span id="particle-count-value">50k</span>
+            </div>
+            <div class="setting-row">
+                <label for="sensitivity">Sensitivity:</label>
+                <input type="range" id="sensitivity" min="0" max="100" value="50" class="slider">
+                <span id="sensitivity-value">50%</span>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="control-section">
+            <div class="action-buttons">
+                <button id="settings-btn" class="btn btn-secondary" title="Settings (⚙️)">
+                    <span class="icon">⚙️</span> Settings
+                </button>
+                <button id="screenshot-btn" class="btn btn-secondary" title="Screenshot (S)">
+                    <span class="icon">📸</span> Capture
+                </button>
+                <button id="fullscreen-btn" class="btn btn-secondary" title="Fullscreen (F)">
+                    <span class="icon">⛶</span> Fullscreen
+                </button>
+            </div>
+        </div>
+        
+        <!-- FPS Counter -->
+        <div id="fps-counter" class="fps-display">FPS: 60</div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="close-btn" id="close-settings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <h3>Performance</h3>
+                    <div class="setting-row">
+                        <label for="quality-select">Quality:</label>
+                        <select id="quality-select" class="select-input">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high" selected>High</option>
+                            <option value="ultra">Ultra</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="auto-quality" checked>
+                            Adaptive Quality
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="show-fps" checked>
+                            Show FPS Counter
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>Visual Effects</h3>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="bloom-effect" checked>
+                            Bloom/Glow
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="motion-blur">
+                            Motion Blur
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="vignette">
+                            Vignette
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>Camera</h3>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="auto-rotate">
+                            Auto-Rotate
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="camera-shake" checked>
+                            Shake on Beat
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <button class="close-btn" id="close-help">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="shortcuts-table">
+                    <tr><td><kbd>Space</kbd></td><td>Play/Pause</td></tr>
+                    <tr><td><kbd>M</kbd></td><td>Toggle Microphone</td></tr>
+                    <tr><td><kbd>1-6</kbd></td><td>Switch Modes</td></tr>
+                    <tr><td><kbd>C</kbd></td><td>Cycle Colors</td></tr>
+                    <tr><td><kbd>R</kbd></td><td>Auto-Rotate</td></tr>
+                    <tr><td><kbd>F</kbd></td><td>Fullscreen</td></tr>
+                    <tr><td><kbd>S</kbd></td><td>Screenshot</td></tr>
+                    <tr><td><kbd>+/-</kbd></td><td>Adjust Particles</td></tr>
+                    <tr><td><kbd>←/→</kbd></td><td>Seek Audio</td></tr>
+                    <tr><td><kbd>↑/↓</kbd></td><td>Volume</td></tr>
+                    <tr><td><kbd>?</kbd></td><td>Show This Help</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Drag and Drop Overlay -->
+    <div id="drop-zone" class="drop-zone hidden">
+        <div class="drop-zone-content">
+            <span class="icon">🎵</span>
+            <p>Drop audio file here</p>
+        </div>
+    </div>
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/audioEngine.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/modes/waveMode.js"></script>
+    <script src="js/modes/sphereMode.js"></script>
+    <script src="js/modes/helixMode.js"></script>
+    <script src="js/modes/galaxyMode.js"></script>
+    <script src="js/modes/vortexMode.js"></script>
+    <script src="js/modes/barsMode.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
