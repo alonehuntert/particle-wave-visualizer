@@ -50,9 +50,9 @@ class BarsMode {
                 positions[index * 3 + 1] = visible ? y : -1000;
                 positions[index * 3 + 2] = visible ? z : 0;
                 const heightNorm = y / this.maxHeight;
-                colors[index * 3] = this.particleSystem.colorScheme[0] * (0.3 + heightNorm * 0.7);
-                colors[index * 3 + 1] = this.particleSystem.colorScheme[1] * (0.5 + barValue * 0.5);
-                colors[index * 3 + 2] = this.particleSystem.colorScheme[2] * (0.8 + heightNorm * 0.2);
+                colors[index * 3] = this.particleSystem.colorScheme[0][0] * (0.3 + heightNorm * 0.7);
+                colors[index * 3 + 1] = this.particleSystem.colorScheme[0][1] * (0.5 + barValue * 0.5);
+                colors[index * 3 + 2] = this.particleSystem.colorScheme[0][2] * (0.8 + heightNorm * 0.2);
                 index++;
                 if (index >= this.particleSystem.particleCount) break;
             }
