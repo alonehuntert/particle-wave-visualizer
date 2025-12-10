@@ -6,7 +6,7 @@ class GalaxyMode {
         this.arms = 3;
         this.maxRadius = 80;
     }
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         for (let i = 0; i < this.particleSystem.particleCount; i++) {
             const arm = i % this.arms;
