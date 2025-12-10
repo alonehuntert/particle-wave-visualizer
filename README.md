@@ -53,7 +53,17 @@ git clone https://github.com/alonehuntert/particle-wave-visualizer.git
 cd particle-wave-visualizer
 ```
 
-2. Serve with a local web server (required for audio features):
+2. **(Optional) Download Three.js locally** if CDN is blocked:
+```bash
+# Download Three.js to lib folder
+curl -o lib/three.min.js https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js
+
+# Then update index.html to use local file instead of CDN
+# Uncomment: <script src="lib/three.min.js"></script>
+# Comment out: <script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script>
+```
+
+3. Serve with a local web server (required for audio features):
 ```bash
 # Using Python
 python -m http.server 8000
@@ -193,6 +203,42 @@ colors: {
 - WebGL support
 - Web Audio API support
 - ES6+ JavaScript support
+
+## ❓ Troubleshooting
+
+### Three.js Not Loading (CDN Blocked)
+If you see "THREE is not defined" error:
+
+1. Download Three.js locally:
+```bash
+curl -o lib/three.min.js https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js
+```
+
+2. Update `index.html`:
+```html
+<!-- Comment out CDN -->
+<!-- <script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script> -->
+
+<!-- Use local file -->
+<script src="lib/three.min.js"></script>
+```
+
+### Microphone Not Working
+- Ensure you're using HTTPS or localhost
+- Grant microphone permissions in browser
+- Check browser console for permission errors
+
+### Audio File Not Playing
+- Ensure file format is supported (MP3, WAV, OGG)
+- Check browser console for CORS errors
+- Serve files from the same domain
+
+### Low Performance
+- Reduce particle count to 10,000-20,000
+- Lower quality preset to Medium or Low
+- Disable motion blur and other effects
+- Close other browser tabs
+- Update graphics drivers
 
 ## 🤝 Contributing
 

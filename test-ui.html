@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Test - Particle Wave Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/controls.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        #canvas-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #canvas-container::before {
+            content: '✨ 3D Visualization Canvas ✨';
+            color: white;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Container (simulated) -->
+    <div id="canvas-container"></div>
+    
+    <!-- Main Controls Panel -->
+    <div id="controls-panel" class="glass-panel slide-in-left">
+        <div class="panel-header">
+            <h1>🌊 Particle Wave Visualizer</h1>
+            <p class="author">by <a href="https://alonehuntert.com" target="_blank">alonehuntert</a></p>
+        </div>
+        
+        <!-- Audio Input Section -->
+        <div class="control-section">
+            <h3>Audio Input</h3>
+            <div class="input-buttons">
+                <button class="btn btn-primary">
+                    <span class="icon">🎤</span> Microphone
+                </button>
+                <label class="btn btn-primary">
+                    <span class="icon">📁</span> Upload File
+                </label>
+            </div>
+            <div class="demo-tracks">
+                <button class="btn btn-secondary demo-track">Demo Track 1</button>
+                <button class="btn btn-secondary demo-track">Demo Track 2</button>
+            </div>
+        </div>
+        
+        <!-- Audio Controls -->
+        <div class="control-section">
+            <div class="audio-controls">
+                <button class="btn-icon">
+                    <span>▶️</span>
+                </button>
+                <div class="seek-bar-container">
+                    <input type="range" class="slider" min="0" max="100" value="0">
+                    <div class="time-display">
+                        <span>0:00</span>
+                        <span>0:00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="volume-control">
+                <span class="icon">🔊</span>
+                <input type="range" class="slider" min="0" max="100" value="80">
+                <span>80%</span>
+            </div>
+        </div>
+        
+        <!-- Visualization Settings -->
+        <div class="control-section">
+            <h3>Visualization</h3>
+            <div class="setting-row">
+                <label>Mode:</label>
+                <select class="select-input">
+                    <option>🌊 Wave Ocean</option>
+                    <option>🔮 Particle Sphere</option>
+                    <option>🧬 DNA Helix</option>
+                    <option>🌌 Galaxy Spiral</option>
+                    <option>🌀 Vortex Tunnel</option>
+                    <option>📊 Frequency Bars</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label>Color:</label>
+                <select class="select-input">
+                    <option>💜 Neon</option>
+                    <option>🌈 Rainbow</option>
+                    <option>🔥 Fire</option>
+                    <option>🌊 Ocean</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label>Particles:</label>
+                <input type="range" class="slider" min="1000" max="100000" value="50000">
+                <span>50k</span>
+            </div>
+            <div class="setting-row">
+                <label>Sensitivity:</label>
+                <input type="range" class="slider" min="0" max="100" value="50">
+                <span>50%</span>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="control-section">
+            <div class="action-buttons">
+                <button class="btn btn-secondary hover-lift">
+                    <span class="icon">⚙️</span> Settings
+                </button>
+                <button class="btn btn-secondary hover-lift">
+                    <span class="icon">📸</span> Capture
+                </button>
+                <button class="btn btn-secondary hover-lift">
+                    <span class="icon">⛶</span> Fullscreen
+                </button>
+            </div>
+        </div>
+        
+        <!-- FPS Counter -->
+        <div class="fps-display">FPS: 60</div>
+    </div>
+    
+    <script>
+        // Simple demo to show interactivity
+        document.querySelectorAll('.btn, .slider').forEach(el => {
+            el.addEventListener('click', () => {
+                el.classList.add('beat-pulse');
+                setTimeout(() => el.classList.remove('beat-pulse'), 300);
+            });
+        });
+    </script>
+</body>
+</html>
