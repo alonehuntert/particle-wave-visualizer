@@ -1,80 +1,51 @@
-/* ================================
-   Particle Sphere Mode
-   ================================ */
-
+// Particle Sphere Mode
 class SphereMode {
     constructor(particleSystem) {
         this.particleSystem = particleSystem;
-        this.config = CONFIG.modes.sphere;
         this.time = 0;
+        this.radius = 50;
     }
-    
-    /**
-     * Initialize sphere
-     */
-    init() {
-        const particleCount = this.particleSystem.particleCount;
-        const radius = this.config.radius;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            
-            // Fibonacci sphere distribution
-            const phi = Math.acos(1 - 2 * (i + 0.5) / particleCount);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-            
-            const x = Math.cos(theta) * Math.sin(phi);
-            const y = Math.sin(theta) * Math.sin(phi);
-            const z = Math.cos(phi);
-            
-            this.particleSystem.positions[i3] = x * radius;
-            this.particleSystem.positions[i3 + 1] = y * radius;
-            this.particleSystem.positions[i3 + 2] = z * radius;
-            
-            this.particleSystem.originalPositions[i3] = x;
-            this.particleSystem.originalPositions[i3 + 1] = y;
-            this.particleSystem.originalPositions[i3 + 2] = z;
+
+    initialize() {
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = this.radius;
+            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            positions[i * 3 + 2] = r * Math.cos(phi);
         }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors();
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    
-    /**
-     * Update sphere animation
-     */
+
     update(audioData) {
-        this.time += this.config.pulseSpeed;
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const colors = this.particleSystem.geometry.attributes.color.array;
+        this.time += 0.01;
+        const bass = audioData.bass / 255;
+        const mid = audioData.mid / 255;
+        const treble = audioData.treble / 255;
+        const radiusMod = this.radius * (1 + bass * 0.5);
         
-        const particleCount = this.particleSystem.particleCount;
-        const baseRadius = this.config.radius;
-        const pulse = Math.sin(this.time) * this.config.pulseAmount;
-        const bassBoost = (audioData.bass / 255) * 30;
-        const radius = baseRadius + pulse + bassBoost;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
+            const x = positions[i * 3];
+            const y = positions[i * 3 + 1];
+            const z = positions[i * 3 + 2];
+            const dist = Math.sqrt(x * x + y * y + z * z);
+            const norm = radiusMod / dist;
             
-            const x = this.particleSystem.originalPositions[i3];
-            const y = this.particleSystem.originalPositions[i3 + 1];
-            const z = this.particleSystem.originalPositions[i3 + 2];
+            positions[i * 3] = x * norm;
+            positions[i * 3 + 1] = y * norm;
+            positions[i * 3 + 2] = z * norm;
             
-            // Apply pulsing radius
-            this.particleSystem.positions[i3] = x * radius;
-            this.particleSystem.positions[i3 + 1] = y * radius;
-            this.particleSystem.positions[i3 + 2] = z * radius;
-            
-            // Add some noise based on treble
-            const noise = (audioData.treble / 255) * 5;
-            this.particleSystem.positions[i3] += (Math.random() - 0.5) * noise;
-            this.particleSystem.positions[i3 + 1] += (Math.random() - 0.5) * noise;
-            this.particleSystem.positions[i3 + 2] += (Math.random() - 0.5) * noise;
+            const pulse = Math.sin(this.time * 5 + i * 0.01) * mid * 0.3;
+            colors[i * 3] = this.particleSystem.colorScheme[0] * (0.7 + pulse + treble * 0.3);
+            colors[i * 3 + 1] = this.particleSystem.colorScheme[1] * (0.7 + bass * 0.3);
+            colors[i * 3 + 2] = this.particleSystem.colorScheme[2] * (0.7 + mid * 0.3);
         }
         
-        // Rotate sphere
-        this.particleSystem.rotate(0, this.config.rotationSpeed, 0);
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors(audioData);
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
+        this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
 }
