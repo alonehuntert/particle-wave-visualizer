@@ -6,7 +6,7 @@ class WaveMode {
         this.gridSize = 100;
     }
 
-    initialize() {
+    init() {
         const positions = this.particleSystem.geometry.attributes.position.array;
         const gridSpacing = this.gridSize / Math.sqrt(this.particleSystem.particleCount);
         let index = 0;
