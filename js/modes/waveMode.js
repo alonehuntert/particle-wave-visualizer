@@ -12,7 +12,7 @@ class WaveMode {
         let index = 0;
         const rows = Math.sqrt(this.particleSystem.particleCount);
         const cols = rows;
-        
+
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
                 const x = (i - rows / 2) * gridSpacing;
@@ -36,10 +36,10 @@ class WaveMode {
         const bass = audioData.bass / 255;
         const mid = audioData.mid / 255;
         const treble = audioData.treble / 255;
-        
+
         let index = 0;
         const rows = Math.sqrt(this.particleSystem.particleCount);
-        
+
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < rows; j++) {
                 const x = positions[index * 3];
@@ -47,20 +47,20 @@ class WaveMode {
                 const distance = Math.sqrt(x * x + z * z);
                 const waveHeight = Math.sin(distance * 0.05 - this.time * 2) * 10 * (1 + bass * 2);
                 const ripple = Math.sin(this.time * 3 + i * 0.1) * 2 * mid;
-                
+
                 positions[index * 3 + 1] = waveHeight + ripple;
-                
+
                 const heightNorm = (waveHeight + 20) / 40;
-colors[index * 3] = this.particleSystem.colorPalette[0][0] * (0.5 + heightNorm * 0.5 + treble * 0.3);
-colors[index * 3 + 1] = this.particleSystem.colorPalette[0][1] * (0.5 + bass * 0.5);
-colors[index * 3 + 2] = this.particleSystem.colorPalette[0][2] * (0.5 + mid * 0.5);
-                
+                colors[index * 3] = this.particleSystem.colorPalette[0][0] * (0.5 + heightNorm * 0.5 + treble * 0.3);
+                colors[index * 3 + 1] = this.particleSystem.colorPalette[0][1] * (0.5 + bass * 0.5);
+                colors[index * 3 + 2] = this.particleSystem.colorPalette[0][2] * (0.5 + mid * 0.5);
+
                 index++;
                 if (index >= this.particleSystem.particleCount) break;
             }
             if (index >= this.particleSystem.particleCount) break;
         }
-        
+
         this.particleSystem.geometry.attributes.position.needsUpdate = true;
         this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
