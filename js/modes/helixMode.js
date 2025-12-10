@@ -1,78 +1,51 @@
-/* ================================
-   DNA Helix Mode
-   ================================ */
-
+// DNA Helix Mode
 class HelixMode {
     constructor(particleSystem) {
         this.particleSystem = particleSystem;
-        this.config = CONFIG.modes.helix;
         this.time = 0;
+        this.helixRadius = 20;
+        this.helixHeight = 80;
     }
-    
-    /**
-     * Initialize double helix
-     */
-    init() {
-        const particleCount = this.particleSystem.particleCount;
-        const radius = this.config.radius;
-        const height = this.config.height;
-        const coils = this.config.coils;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            const t = (i / particleCount) * coils * Math.PI * 2;
-            const y = (i / particleCount) * height - height / 2;
-            
-            // Determine which strand (0 or 1)
+
+    initialize() {
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
             const strand = i % 2;
-            const offset = strand * Math.PI; // 180 degree offset for second strand
+            const t = (i / this.particleSystem.particleCount) * this.helixHeight;
+            const angle = t * 0.2 + strand * Math.PI;
             
-            const x = Math.cos(t + offset) * radius;
-            const z = Math.sin(t + offset) * radius;
-            
-            this.particleSystem.positions[i3] = x;
-            this.particleSystem.positions[i3 + 1] = y;
-            this.particleSystem.positions[i3 + 2] = z;
-            
-            this.particleSystem.originalPositions[i3] = t;
-            this.particleSystem.originalPositions[i3 + 1] = y;
-            this.particleSystem.originalPositions[i3 + 2] = strand;
+            positions[i * 3] = Math.cos(angle) * this.helixRadius;
+            positions[i * 3 + 1] = t - this.helixHeight / 2;
+            positions[i * 3 + 2] = Math.sin(angle) * this.helixRadius;
         }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors();
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    
-    /**
-     * Update helix animation
-     */
+
     update(audioData) {
-        this.time += this.config.rotationSpeed;
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const colors = this.particleSystem.geometry.attributes.color.array;
+        this.time += 0.02;
+        const bass = audioData.bass / 255;
+        const mid = audioData.mid / 255;
+        const treble = audioData.treble / 255;
+        const radiusMod = this.helixRadius * (1 + bass * 0.3);
         
-        const particleCount = this.particleSystem.particleCount;
-        const baseRadius = this.config.radius;
-        const thickness = this.config.thickness * (1 + audioData.mid / 255);
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            const t = this.particleSystem.originalPositions[i3];
-            const y = this.particleSystem.originalPositions[i3 + 1];
-            const strand = this.particleSystem.originalPositions[i3 + 2];
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
+            const strand = i % 2;
+            const t = (i / this.particleSystem.particleCount) * this.helixHeight;
+            const angle = t * 0.2 + strand * Math.PI + this.time;
             
-            const offset = strand * Math.PI;
-            const radius = baseRadius + Math.sin(y * 0.1 + this.time) * thickness;
+            positions[i * 3] = Math.cos(angle) * radiusMod;
+            positions[i * 3 + 1] = t - this.helixHeight / 2 + Math.sin(this.time * 2 + t * 0.1) * 5 * mid;
+            positions[i * 3 + 2] = Math.sin(angle) * radiusMod;
             
-            this.particleSystem.positions[i3] = Math.cos(t + offset + this.time) * radius;
-            this.particleSystem.positions[i3 + 1] = y;
-            this.particleSystem.positions[i3 + 2] = Math.sin(t + offset + this.time) * radius;
-            
-            // Add bass influence
-            const bassInfluence = (audioData.bass / 255) * 5;
-            this.particleSystem.positions[i3] *= (1 + bassInfluence * 0.1);
-            this.particleSystem.positions[i3 + 2] *= (1 + bassInfluence * 0.1);
+            const tNorm = t / this.helixHeight;
+            colors[i * 3] = this.particleSystem.colorScheme[0] * (0.5 + tNorm * 0.5 + treble * 0.3);
+            colors[i * 3 + 1] = this.particleSystem.colorScheme[1] * (0.7 + bass * 0.3);
+            colors[i * 3 + 2] = this.particleSystem.colorScheme[2] * (0.6 + mid * 0.4);
         }
         
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors(audioData);
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
+        this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
 }
