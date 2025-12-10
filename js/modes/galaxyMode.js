@@ -1,91 +1,46 @@
-/* ================================
-   Galaxy Spiral Mode
-   ================================ */
-
+// Galaxy Spiral Mode
 class GalaxyMode {
     constructor(particleSystem) {
         this.particleSystem = particleSystem;
-        this.config = CONFIG.modes.galaxy;
         this.time = 0;
+        this.arms = 3;
+        this.maxRadius = 80;
     }
-    
-    /**
-     * Initialize galaxy spiral
-     */
-    init() {
-        const particleCount = this.particleSystem.particleCount;
-        const arms = this.config.arms;
-        const radius = this.config.radius;
-        const armSpread = this.config.armSpread;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            
-            // Determine which arm
-            const arm = i % arms;
-            const armAngle = (arm / arms) * Math.PI * 2;
-            
-            // Distance from center (0 to 1)
-            const distance = Math.pow(i / particleCount, 0.5);
-            const r = distance * radius;
-            
-            // Spiral angle
-            const angle = armAngle + distance * Math.PI * 4 * armSpread;
-            
-            // Add some randomness
-            const randomAngle = (Math.random() - 0.5) * 0.5;
-            const randomRadius = (Math.random() - 0.5) * 10;
-            
-            const x = Math.cos(angle + randomAngle) * (r + randomRadius);
-            const z = Math.sin(angle + randomAngle) * (r + randomRadius);
-            const y = (Math.random() - 0.5) * 20 * (1 - distance);
-            
-            this.particleSystem.positions[i3] = x;
-            this.particleSystem.positions[i3 + 1] = y;
-            this.particleSystem.positions[i3 + 2] = z;
-            
-            this.particleSystem.originalPositions[i3] = distance;
-            this.particleSystem.originalPositions[i3 + 1] = armAngle;
-            this.particleSystem.originalPositions[i3 + 2] = y;
+    initialize() {
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
+            const arm = i % this.arms;
+            const armAngle = (arm / this.arms) * Math.PI * 2;
+            const distance = Math.pow(Math.random(), 0.5) * this.maxRadius;
+            const angle = armAngle + distance * 0.1;
+            positions[i * 3] = Math.cos(angle) * distance;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 2] = Math.sin(angle) * distance;
         }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors();
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    
-    /**
-     * Update galaxy animation
-     */
     update(audioData) {
-        this.time += this.config.rotationSpeed;
-        
-        const particleCount = this.particleSystem.particleCount;
-        const radius = this.config.radius;
-        const armSpread = this.config.armSpread;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            
-            const distance = this.particleSystem.originalPositions[i3];
-            const armAngle = this.particleSystem.originalPositions[i3 + 1];
-            const baseY = this.particleSystem.originalPositions[i3 + 2];
-            
-            const r = distance * radius;
-            
-            // Rotation speed varies with distance
-            const rotationSpeed = this.time * (1 - distance * 0.5);
-            const angle = armAngle + distance * Math.PI * 4 * armSpread + rotationSpeed;
-            
-            // Add audio reactivity
-            const bassBoost = (audioData.bass / 255) * 10;
-            const midWave = Math.sin(angle + this.time * 2) * (audioData.mid / 255) * 5;
-            
-            this.particleSystem.positions[i3] = Math.cos(angle) * (r + bassBoost);
-            this.particleSystem.positions[i3 + 1] = baseY + midWave;
-            this.particleSystem.positions[i3 + 2] = Math.sin(angle) * (r + bassBoost);
+        const positions = this.particleSystem.geometry.attributes.position.array;
+        const colors = this.particleSystem.geometry.attributes.color.array;
+        this.time += 0.005;
+        const bass = audioData.bass / 255;
+        const mid = audioData.mid / 255;
+        const treble = audioData.treble / 255;
+        for (let i = 0; i < this.particleSystem.particleCount; i++) {
+            const arm = i % this.arms;
+            const armAngle = (arm / this.arms) * Math.PI * 2;
+            const distance = Math.sqrt(positions[i * 3] ** 2 + positions[i * 3 + 2] ** 2);
+            const angle = armAngle + distance * 0.1 + this.time;
+            const distMod = distance * (1 + bass * 0.2);
+            positions[i * 3] = Math.cos(angle) * distMod;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 10 * (1 + mid * 0.5);
+            positions[i * 3 + 2] = Math.sin(angle) * distMod;
+            const distNorm = distance / this.maxRadius;
+            colors[i * 3] = this.particleSystem.colorScheme[0] * (0.5 + distNorm * 0.5 + treble * 0.3);
+            colors[i * 3 + 1] = this.particleSystem.colorScheme[1] * (0.5 + bass * 0.5);
+            colors[i * 3 + 2] = this.particleSystem.colorScheme[2] * (0.8 + mid * 0.2);
         }
-        
-        this.particleSystem.updatePositions();
-        this.particleSystem.updateColors(audioData);
+        this.particleSystem.geometry.attributes.position.needsUpdate = true;
+        this.particleSystem.geometry.attributes.color.needsUpdate = true;
     }
 }
